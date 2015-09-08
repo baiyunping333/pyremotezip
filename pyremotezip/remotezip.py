@@ -23,6 +23,7 @@ class RemoteZip(object):
         self.directory_end = None
         self.raw_bytes = None
         self.directory_size = None
+        self.zip_end_size = None 
 
 
     def __file_exists(self):
@@ -43,7 +44,7 @@ class RemoteZip(object):
 
         # now request bytes from that size minus a 64kb max zip directory length
         self.request = urllib2.Request(self.zipURI)
-        self.start = self.filesize - (65536)
+        self.start = self.filesize - 65536
         self.end = self.filesize - 1
         self.request.headers['Range'] = "bytes=%s-%s" % (self.start, self.end)
         handle = urllib2.urlopen(self.request)
@@ -59,6 +60,7 @@ class RemoteZip(object):
         # now find the end-of-directory: 06054b50
         # we're on little endian maybe
         self.directory_end = self.raw_bytes.find("\x50\x4b\x05\x06")
+        self.zip_end_size = 65535 - self.directory_end 
         if self.directory_end < 0:
             raise Exception("Could not find end of directory")
 
@@ -68,7 +70,7 @@ class RemoteZip(object):
         return self.directory_size
 
     def requestContentDirectory(self):
-        self.start = self.filesize - self.directory_size
+        self.start = self.filesize - self.directory_size - self.zip_end_size
         self.end = self.filesize - 1
         self.request.headers['Range'] = "bytes=%s-%s" % (self.start, self.end)
         handle = urllib2.urlopen(self.request)
@@ -82,7 +84,6 @@ class RemoteZip(object):
         self.raw_bytes = handle.read()
         self.directory_end = self.raw_bytes.find("\x50\x4b\x05\x06")
 
-
     def getTableOfContents(self):
         """
         This function populates the internal tableOfContents list with the contents
@@ -92,7 +93,6 @@ class RemoteZip(object):
 
         self.directory_size = self.getDirectorySize()
         if self.directory_size > 65536:
-            self.directory_size += 2
             self.requestContentDirectory()
 
 
@@ -100,7 +100,6 @@ class RemoteZip(object):
         directory_start = unpack("i", self.raw_bytes[self.directory_end + 16: self.directory_end + 20])[0]
 
         # find the data in the raw_bytes
-        self.raw_bytes = self.raw_bytes
         current_start = directory_start - self.start
         filestart = 0
         compressedsize = 0

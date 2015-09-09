@@ -114,6 +114,9 @@ class RemoteZip(object):
 
                 filename = self.raw_bytes[current_start + 46: current_start + 46 + zip_n]
 
+                if type(filename) is str:
+                    filename = filename.decode('utf8', 'ignore')
+
                 # check if this is the index file
                 filestart = unpack("I", self.raw_bytes[current_start + 42: current_start + 42 + 4])[0]
                 compressedsize = unpack("I", self.raw_bytes[current_start + 20: current_start + 20 + 4])[0]

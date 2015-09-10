@@ -160,8 +160,6 @@ class RemoteZip(object):
         zip_n = unpack("H", filedata[26:28])[0]
         zip_m = unpack("H", filedata[28:30])[0]
 
-        self.file_name = filedata[30, 30 + zip_n]
-
         # check compressed size
         comp_size = unpack("I", filedata[18:22])[0]
         if comp_size != fileRecord['compressedsize']:

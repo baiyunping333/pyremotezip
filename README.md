@@ -18,5 +18,5 @@ Have you forked and improved this? Please submit your pull requests and raise is
 
 ### Warning
 
-* remotezip need http's Content-Range feature.[Content-Range](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html)
+* remotezip need http's Content-Range feature.[Content-Range](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.16)
 * Can't support zip file > 4G, or compressed file >4G, temporarily. Next plan is adding zlib64 supporting.

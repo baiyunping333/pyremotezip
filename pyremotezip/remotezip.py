@@ -25,7 +25,6 @@ class RemoteZip(object):
         self.directory_size = None
         self.zip_end_size = None 
 
-
     def __file_exists(self):
         # check if file exists
         headRequest = urllib2.Request(self.zipURI)
@@ -161,6 +160,8 @@ class RemoteZip(object):
         zip_n = unpack("H", filedata[26:28])[0]
         zip_m = unpack("H", filedata[28:30])[0]
 
+        self.file_name = filedata[30, 30 + zip_n]
+
         # check compressed size
         comp_size = unpack("I", filedata[18:22])[0]
         if comp_size != fileRecord['compressedsize']:
@@ -176,6 +177,26 @@ class RemoteZip(object):
                 uncompressed_data = uncompressed_data + rv
 
         return uncompressed_data
+
+    def get_name_from_file_header(self, filename):
+        files = [x for x in self.tableOfContents if x['filename'] == filename]
+        if len(files) == 0:
+            raise FileNotFoundException()
+
+        fileRecord = files[0]
+
+        # got here? need to fetch the file size
+        metaheadroom = 512  # should be enough
+        request = urllib2.Request(self.zipURI)
+        end = fileRecord['filestart'] + metaheadroom
+        request.headers['Range'] = "bytes=%s-%s" % (fileRecord['filestart'], end)
+        handle = urllib2.urlopen(request)
+        filedata = handle.read()
+
+        # find start of raw file data
+        zip_n = unpack("H", filedata[26:28])[0]
+
+        return filedata[30:30 + zip_n]
 
 
 class FileNotFoundException(Exception):

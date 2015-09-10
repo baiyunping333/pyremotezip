@@ -15,3 +15,7 @@ PyRemoteZip is a pure python module to extract files from remote zip archives wi
 ### Contributing
 
 Have you forked and improved this? Please submit your pull requests and raise issues here!
+
+### Warning
+
+Can't support zip file > 4G, or compressed file >4G, temporarily. Next plan is adding zlib64 supporting.
